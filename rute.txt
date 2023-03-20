@@ -1,0 +1,302 @@
+
+paths:
+  /:
+    get:
+      summary: "GET "
+      responses:
+        "200":
+          description: "OK"
+    post:
+      summary: "POST "
+      responses:
+        "200":
+          description: "OK"
+
+
+  /{id}:
+    put:
+      summary: "PUT {id}"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: false
+      responses:
+        "200":
+          description: "OK"
+    delete:
+      summary: "DELETE {id}"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: false
+      responses:
+        "200":
+          description: "OK"
+
+  /crops:
+    get:
+      summary: "GET crops"
+      responses:
+        "200":
+          description: "OK"
+  /crops/{id}:
+    get:
+      summary: "GET crops/{id}"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: false
+      responses:
+        "200":
+          description: "OK"
+    post:
+      summary: "POST crops/{id}"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: false
+      responses:
+        "200":
+          description: "OK"
+    put:
+      summary: "PUT crops/{id}"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: false
+      responses:
+        "200":
+          description: "OK"
+
+            /:
+    put:
+      summary: "PUT "
+      responses:
+        "200":
+          description: "OK"
+    post:
+      summary: "POST "
+      responses:
+        "200":
+          description: "OK"
+  /login:
+    post:
+      summary: "POST login"
+      responses:
+        "200":
+          description: "OK"
+
+            /me:
+    get:
+      summary: "GET me"
+      responses:
+        "200":
+          description: "OK"
+  /:
+    put:
+      summary: "PUT "
+      responses:
+        "200":
+          description: "OK"
+    post:
+      summary: "POST "
+      responses:
+        "200":
+          description: "OK"
+  /login:
+    post:
+      summary: "POST login"
+      responses:
+        "200":
+          description: "OK"
+  /me:
+    get:
+      summary: "GET me"
+      responses:
+        "200":
+          description: "OK"
+  /:
+    get:
+      summary: "GET "
+      responses:
+        "200":
+          description: "OK"
+    post:
+      summary: "POST "
+      responses:
+        "200":
+          description: "OK"
+  /{id}:
+    put:
+      summary: "PUT {id}"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: false
+      responses:
+        "200":
+          description: "OK"
+    delete:
+      summary: "DELETE {id}"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: false
+      responses:
+        "200":
+          description: "OK"
+  /crops:
+    get:
+      summary: "GET crops"
+      responses:
+        "200":
+          description: "OK"
+  /crops/{id}:
+    get:
+      summary: "GET crops/{id}"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: false
+      responses:
+        "200":
+          description: "OK"
+    post:
+      summary: "POST crops/{id}"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: false
+      responses:
+        "200":
+          description: "OK"
+    put:
+      summary: "PUT crops/{id}"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: false
+      responses:
+        "200":
+          description: "OK"
+
+
+
+
+
+
+
+Actor: Farmer
+
+Create account: The farmer can create an account by providing their email and password.
+View crops: The farmer can view the crops that are currently being grown on the farm.
+Optimal crop rotation: The farmer can request information about the optimal crop rotation based on the crops they have selected for rotation.
+Weather/humidity recommendations: The farmer can receive recommendations about what crops to grow based on weather/humidity data.
+Update account: The farmer can update their email or password.
+Actor: Administrator
+
+Create account: The administrator can create an account by providing their email and password.
+View crops: The administrator can view the crops that are currently being grown on the farm.
+Optimal crop rotation: The administrator can request information about the optimal crop rotation based on the crops selected by the farmer.
+Weather/humidity recommendations: The administrator can receive recommendations about what crops to grow based on weather/humidity data.
+Add crops: The administrator can add new crops to the system, along with their information such as name, description, and growing conditions.
+Delete users: The administrator can delete user accounts if necessary.
+View all rotations: The administrator can view all of the crop rotations that have been made on the farm.
+
+
+
+
+Actors:
+Farmer: can create an account, see crops, get optimal crop rotation, get recommendations based on weather/humidity, change their email or password.
+Administrator: can do everything a farmer can do, add crops with crop information, delete users, see all of the rotations that have been made.
+Use cases:
+Create account: both the farmer and administrator can create an account. The system verifies the email and password, and only allows the user to change their email or password after successfully creating the account.
+Login: both the farmer and administrator can log in to the system with their email and password.
+View crops: both the farmer and administrator can view the list of crops that are currently in the system.
+Add crop: only the administrator can add new crops to the system, including the crop information.
+Get optimal crop rotation: the farmer can request an optimal crop rotation based on the crops they have selected to plant.
+Get recommendations: the farmer can request crop recommendations based on the weather and humidity in their area.
+Select crops for rotation: the farmer can select which crops they want to rotate.
+View rotation history: the administrator can view a history of all crop rotations that have been made in the system.
+Delete account: only the administrator can delete a user account from the system.
+Logic:
+Only a logged-in user can access the system features.
+After creating an account, the user must log in to the system to access the features.
+The system verifies the email and password when creating an account and logging in.
+The farmer can change their email or password only after successfully creating an account.
+Only the administrator can add new crops to the system.
+The farmer can select which crops they want to rotate.
+The administrator can view a history of all crop rotations that have been made in the system.
+Only the administrator can delete a user account from the system.
+
+
+@startuml
+left to right direction
+actor Farmer
+actor Administrator
+
+rectangle "Account Management" as account {
+  usecase "Create Account" as UC1
+  usecase "Change Email" as UC2
+  usecase "Change Password" as UC3
+  usecase "Login" as UC4
+  Farmer --> UC1
+  Farmer --> UC2
+  Farmer --> UC3
+  Farmer --> UC4
+  UC4 --> (View Crops)
+}
+
+rectangle "Crop Management" as crop {
+  usecase "View Crops" as UC5
+  usecase "Add Crop" as UC6
+  usecase "Delete Crop" as UC7
+  Administrator --> UC5
+  Administrator --> UC6
+  Administrator --> UC7
+  Farmer --> UC5
+}
+
+rectangle "Crop Rotation Management" as rotation {
+  usecase "Optimal Crop Rotation" as UC8
+  usecase "Select Crops for Rotation" as UC9
+  usecase "Weather/Humidity Recommendations" as UC10
+  usecase "View Rotation History" as UC11
+  Farmer --> UC8
+  Farmer --> UC9
+  Farmer --> UC10
+  Farmer --> UC11
+  Administrator --> UC11
+}
+
+UC2 --> (Verify Credentials)
+UC3 --> (Verify Credentials)
+UC4 --> (Verify Credentials)
+(Verify Credentials) --> (Verify Role)
+(Verify Role) --> (Access Control)
+(Account Management) -- (Access Control)
+(Crop Management) -- (Access Control)
+(Crop Rotation Management) -- (Access Control)
+@enduml
+
+
+
+sequence diagram:
+
+@startuml
+actor User
+participant Dashboard
+participant RotatieForm
+participant RotatieItem
+participant CulturaStore
+participant Database
+
+User -> Dashboard: Sends request to load crops
+Dashboard -> RotatieForm: getCrops()
+RotatieForm -> CulturaStore: Request crops data
+CulturaStore -> Database: Fetch crops data
+Database --> CulturaStore: Returns crops data
+CulturaStore --> RotatieForm: Returns crops data
+RotatieForm --> Dashboard: Returns crops data
+Dashboard -> RotatieItem: Display crops data
+@enduml

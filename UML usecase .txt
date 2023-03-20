@@ -1,0 +1,85 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype polyline
+
+class node2 as "@types/.../index.d.ts"
+class node0 as "Backend/server.ts" {
+   connectDB: 
+   cors: 
+   cropRoutes.ts: 
+   dotenv: 
+   errorMiddleware.ts: 
+   express: 
+   userRoutes.ts: 
+}
+class node11 as "Controllers/cropController.ts" {
+   Crop: 
+   User: 
+   asyncHandler: 
+}
+class node8 as "Controllers/userController.ts" {
+   User: 
+   asyncHandler: 
+   bcrypt: 
+   jwt: 
+}
+class node4 as "Middleware/authMiddleware.ts" {
+   User: 
+   asyncHandler: 
+   jwt: 
+}
+class node1 as "Middleware/errorMiddleware.ts"
+class node14 as "Models/cropModel.ts" {
+   mongoose: 
+}
+class node6 as "Models/userModel.ts" {
+   mongoose: 
+}
+class node12 as "Routes/cropRoutes.ts" {
+   authMiddleware.ts: 
+   cropController.ts: 
+   express: 
+}
+class node16 as "Routes/userRoutes.ts" {
+   authMiddleware.ts: 
+   express: 
+   userController.ts: 
+}
+class bcryptjs
+class node7 as "config/db.ts"
+class cors
+class dotenv {
+   config: 
+}
+class node3 as "express-async-handler/index.d.ts"
+class jsonwebtoken
+class mongoose
+
+node0         <-[#595959,plain]-  node2        
+node0         <-[#595959,plain]-  node1        
+node0         <-[#595959,plain]-  node12       
+node0         <-[#595959,plain]-  node16       
+node0         <-[#595959,plain]-  node7        
+node0         <-[#595959,plain]-  cors         
+node0         <-[#595959,plain]-  dotenv       
+node11        <-[#595959,plain]-  node14       
+node11        <-[#595959,plain]-  node6        
+node11        <-[#595959,plain]-  node3        
+node8         <-[#595959,plain]-  node6        
+node8         <-[#595959,plain]-  bcryptjs     
+node8         <-[#595959,plain]-  node3        
+node8         <-[#595959,plain]-  jsonwebtoken 
+node4         <-[#595959,plain]-  node6        
+node4         <-[#595959,plain]-  node3        
+node4         <-[#595959,plain]-  jsonwebtoken 
+node14        <-[#595959,plain]-  mongoose     
+node6         <-[#595959,plain]-  mongoose     
+node12        <-[#595959,plain]-  node2        
+node12        <-[#595959,plain]-  node11       
+node12        <-[#595959,plain]-  node4        
+node16        <-[#595959,plain]-  node2        
+node16        <-[#595959,plain]-  node8        
+node16        <-[#595959,plain]-  node4        
+@enduml
