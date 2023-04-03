@@ -31,7 +31,7 @@ const postSchema = mongoose.Schema ({
     },
     image: {
         type: String,
-        required: true,
+        required: false,
     },
     date: {
         type: Date,
@@ -39,7 +39,7 @@ const postSchema = mongoose.Schema ({
     },
 })
 
-const Post = mongoose.model('Post', postSchema)
+module.exports = mongoose.model('Post', postSchema)
 
-module.exports = Post
+
 

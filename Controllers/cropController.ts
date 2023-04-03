@@ -111,7 +111,7 @@ const PutCrop=asyncHandler( async (req: Request,res: Response)=> {
 
    if(!crop){
        res.status(400)
-       throw new Error('Locuinta nu a fost gasita')
+       throw new Error('Crop nu a fost gasit')
    }
 
 
@@ -152,7 +152,7 @@ const DeleteCrop =asyncHandler( async (req: Request ,res: Response) =>{
     }
     //must match logged user with crop user
     if (crop.user.toString() !== req.user.id){
-    res.status(401)
+    res.status(402)
     throw new Error('User not authorized')
     }   
 
@@ -172,3 +172,5 @@ module.exports = {
     SetSelectare
 
 }
+
+

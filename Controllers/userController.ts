@@ -6,9 +6,7 @@ const bcrypt = require('bcryptjs');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/userModel');
 //Generate JWT Token
-const generateToken = (id : string) => jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '120m',
-});
+const generateToken = (id : string) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '2d' });
 
 
 
@@ -46,7 +44,7 @@ const registerUser = asyncHandler(async ( req: Request, res:Response) => {
     const { rol, name, email, password } = req.body;
     if (!rol || !name || !email || !password) {
         res.status(401);
-        throw new Error('Toate campurile trebuie completate gu');
+        throw new Error('Toate campurile trebuie completate');
     }
     
     //check if user exists

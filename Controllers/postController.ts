@@ -32,7 +32,7 @@ interface Request {
 //@route GET /api/posts
 //@acces Private
 const getPost = asyncHandler(async (req: Request, res: Response) => {
-    const posts = await Post.find({ user: req.user.id });
+    const posts = await Post.findById(req.params.id)
     res.status(200).json(posts);
     //res.status(200).json({message:'Get Posts'})
 });
@@ -42,8 +42,9 @@ const getPost = asyncHandler(async (req: Request, res: Response) => {
 
 const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
 
-    const posts = await Post.find({ title: req.body.title });
+    const posts = await Post.find({});
     res.status(200).json(posts);
+    
 
 });
 
@@ -74,12 +75,7 @@ const SetPost = asyncHandler(async (req: Request, res: Response) => {
         throw new Error('Lipsa descriere');
 
     };
-    if (!req.body.image) {
-        res.status(400);
-        throw new Error('Lipsa imagine');
-
-    };
-
+   
     const post = new Post({
         user: req.user.id,
         title: req.body.title,
