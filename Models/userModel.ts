@@ -7,7 +7,7 @@ var mongoose = require('mongoose')
     rol:{
         type:String,
         enum: {
-            values: ['client', 'agent'],
+            values: ['Fermier', 'Administrator'],
           },
         required:[true,'{VALUE} is not supported or missing']
     },

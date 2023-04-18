@@ -34,4 +34,13 @@ const protect = asyncHandler(async (req: { headers: { authorization: string }; u
   }
 })
 
-module.exports = { protect }
+const checkRole = (role) => asyncHandler(async (req, res, next) => {
+  if (req.user && req.user.rol === role) {
+    next();
+  } else {
+    res.status(403);
+    throw new Error('Not authorized, insufficient permissions');
+  }
+});
+
+module.exports = { protect, checkRole };

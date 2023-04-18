@@ -9,7 +9,9 @@ interface Response {
     status: (arg0: number) => { (): any; new(): any; json: { (arg0: any): void; new(): any } }
 }
 interface Request {
-    user: { id: number },
+    user: { id: number 
+        rol: string
+    },
     body: { title: string; 
         titlu: string;
          image: string; 
@@ -57,11 +59,7 @@ const SetCrop =  asyncHandler( async  (req: Request, res: Response) => {
     throw new Error('Lipsa titlu')
     
 };
-if (!req.body.image){
-    res.status(400)
-    throw new Error('Lipsa imagine') };
 
-//upload.single("articleImage");
 
 const crop = await Crop.create({ 
     user: req.user.id,
@@ -121,14 +119,18 @@ const PutCrop=asyncHandler( async (req: Request,res: Response)=> {
        throw new Error('Userul nu a fost gasit')
    }
    //must match logged user with crop user
-   if (crop.user.toString() !== req.user.id){
- res.status(401)
- throw new Error('User neautorizat')
-   }
-   
-   const updatedCrop = await Crop.findByIdAndUpdate(req.params.id, req.body, {
+   if (crop.user.toString() == req.user.id || req.user.rol == 'Administrator'){
+ 
+    await Crop.findByIdAndUpdate(req.params.id, req.body, {
        new:true,
    })
+
+    } else {
+         res.status(401)
+            throw new Error('Userul nu este autorizatf')
+    }
+    const updatedCrop = await Crop.findById(req.params.id)
+
 
     res.status(200).json(updatedCrop)
 })
@@ -150,16 +152,16 @@ const DeleteCrop =asyncHandler( async (req: Request ,res: Response) =>{
         res.status(401)
         throw new Error('User not found')
     }
-    //must match logged user with crop user
-    if (crop.user.toString() !== req.user.id){
-    res.status(402)
-    throw new Error('User not authorized')
-    }   
-
-
+    //must match logged user with crop user or be Administrator
+    if (crop.user.toString() == req.user.id || req.user.rol == 'Administrator'){
+     
      await crop.remove()
- 
      res.status(200).json({message:'Crop removed'})
+    } else {
+        res.status(401)
+        throw new Error('User not authorized')
+    }
+ 
 })
 
 module.exports = {

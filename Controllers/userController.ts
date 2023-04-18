@@ -56,6 +56,11 @@ const registerUser = asyncHandler(async ( req: Request, res:Response) => {
     //hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+
+    if (rol === 'Administrator' && (!req.user || req.user.rol !== 'Administrator')) {
+        res.status(403);
+        throw new Error('Not authorized to create an administrator account');
+      }
     //Create user
     const user = await User.create({
         rol,
@@ -143,10 +148,47 @@ if (user) {
 
 })
 
+//@desc Get all users with role 'Fermier'
+//@route GET /api/users/fermier
+//@access Private/Admin
+const getFermierUsers = asyncHandler(async (req, res) => {
+    if (req.user && req.user.rol === 'Administrator') {
+      const fermierUsers = await User.find({ rol: 'Fermier' });
+      res.status(200).json(fermierUsers);
+    } else {
+      res.status(401);
+      throw new Error('Not authorized as an admin');
+    }
+  });
+  
+  //@desc Delete user
+  //@route DELETE /api/users/:id
+  //@access Private/Admin
+  const deleteUser = asyncHandler(async (req, res) => {
+    if (req.user && req.user.rol === 'Administrator' || req.user.id === req.params.id) {
+      const user = await User.findById(req.params.id);
+  
+      if (user) {
+        await user.remove();
+        res.status(200).json({ message: 'User removed' });
+      } else {
+        res.status(404);
+        throw new Error('User not found');
+      }
+    } else {
+      res.status(401);
+      throw new Error('Not authorized as an admin');
+    }
+  });
+
+
 
 module.exports = {
     registerUser,
     loginUser,
     getMe,
     PutUser,
+    getFermierUsers,
+    deleteUser
+    
 };

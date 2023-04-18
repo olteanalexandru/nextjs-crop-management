@@ -25,7 +25,7 @@ const cropSchema = mongoose.Schema ({
     },
     image: {
         type:String,
-        required:true,
+        required:false,
     },
     selectare: {
         type: Boolean,

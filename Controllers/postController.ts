@@ -128,7 +128,7 @@ const updatePost = asyncHandler(async (req: Request, res: Response) => {
         throw new Error('Post not found');
     }
 }
-);
+); 
 
 module.exports = {
     getPost,
@@ -138,6 +138,8 @@ module.exports = {
     deletePost,
     updatePost,
 };
+
+// Path: Backend\Routes\postRoutes.ts
 
 // Path: Backend\Routes\postRoutes.ts
 

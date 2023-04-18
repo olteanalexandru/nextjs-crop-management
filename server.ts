@@ -7,11 +7,14 @@ const app = express()
 const connectDB = require ('./config/db')
 const cors = require('cors')
 
+
 connectDB()
 app.use(express.json());
 //middleware:
 app.use(express.urlencoded({extended:false}));
 app.use(cors());
+
+//routes:
 
 app.use('/api/posts', require('./routes/postRoutes'))
 app.use('/api/crops', require('./routes/cropRoutes'))
