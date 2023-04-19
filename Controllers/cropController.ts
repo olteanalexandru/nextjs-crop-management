@@ -1,33 +1,41 @@
-export {};
-
-// auto try catch
 const asyncHandler = require('express-async-handler')
 const Crop = require('../models/cropModel')
+import { Request } from 'express';
+import { ParamsDictionary } from 'express-serve-static-core';
 
 
 interface Response {
     status: (arg0: number) => { (): any; new(): any; json: { (arg0: any): void; new(): any } }
 }
-interface Request {
-    user: { id: number 
-        rol: string
-    },
-    body: { title: string; 
-        titlu: string;
-         image: string; 
-         text: string;
-          descriere: string;
-          selectare: boolean;
-           id: string ;
-            _id:string;
-        }
-    params: { id: number; }
-}
+
+interface CustomRequest extends Request {
+    user: {
+      id: number;
+      rol: string;
+    };
+
+    body: {
+      cropName: string;
+      cropType: string;
+      cropVariety: string;
+      plantingDate: string;
+      harvestingDate: string;
+      description: string;
+      selectare: boolean;
+      imageUrl: string;
+      soilType: string;
+      climate: string;
+      _id: string;
+    };
+    params: ParamsDictionary & {
+        id: string;
+      };
+    }
 
 
 //@route GET /api/crops
 //@acces Private
-const getCrop= asyncHandler(async (req: Request ,res: Response) => {
+const getCrop= asyncHandler(async (req: CustomRequest ,res: Response) => {
     const crops = await Crop.find({user: req.user.id})
     res.status(200).json(crops)
     //res.status(200).json({message:'Get Crops'})
@@ -37,15 +45,15 @@ const getCrop= asyncHandler(async (req: Request ,res: Response) => {
 //@route GET /api/crops/crops
 //@acces Public
 
-const getAllCrops = asyncHandler(async (req: Request ,res: Response) => {
-    const crops = await Crop.find({title:req.body.title})
+const getAllCrops = asyncHandler(async (req: CustomRequest ,res: Response) => {
+    const crops = await Crop.find({title:req.body.cropName})
     res.status(200).json(crops)
     
 })
 
 //@route GET /api/crops/crops/:id
 //@acces Public
-const GetSpecific = asyncHandler(async (req: Request, res: Response) => {
+const GetSpecific = asyncHandler(async (req: CustomRequest, res: Response) => {
     const crops = await Crop.findById( req.params.id );
     res.status(200).json(crops);
     //res.status(200).json({message:'Get Crops'})
@@ -53,21 +61,24 @@ const GetSpecific = asyncHandler(async (req: Request, res: Response) => {
 
 //@route SET /api/crops
 //@acces Private
-const SetCrop =  asyncHandler( async  (req: Request, res: Response) => {
-    if (!req.body.titlu){
+const SetCrop =  asyncHandler( async  (req: CustomRequest, res: Response) => {
+    if (!req.body.cropName){
     res.status(400)
-    throw new Error('Lipsa titlu')
+    throw new Error('Lipsa nume cultură')
     
 };
 
-
 const crop = await Crop.create({ 
     user: req.user.id,
-    titlu: req.body.titlu,
-    text:req.body.text,
-    descriere:req.body.descriere,
-    image:JSON.stringify(req.body.image),
-    
+    cropName: req.body.cropName,
+    cropType: req.body.cropType,
+    cropVariety: req.body.cropVariety,
+    plantingDate: req.body.plantingDate,
+    harvestingDate: req.body.harvestingDate,
+    description: req.body.description,
+    imageUrl:JSON.stringify(req.body.imageUrl),
+    soilType: req.body.soilType,
+    climate: req.body.climate,
 })
 res.status(200).json(crop)
 })
@@ -75,7 +86,7 @@ res.status(200).json(crop)
 
 //@route /api/crops/crops/:id
 //@acces Private
-const SetSelectare = asyncHandler(async (req: Request, res: Response) => {
+const SetSelectare = asyncHandler(async (req: CustomRequest, res: Response) => {
      const crop = await Crop.findById(req.params.id)
 if (!crop){
        res.status(400)
@@ -103,34 +114,32 @@ await Crop.findByIdAndUpdate(req.params.id ,  {
 
 //@route PUT /api/crops
 //@acces Private
-const PutCrop=asyncHandler( async (req: Request,res: Response)=> {
+const PutCrop = asyncHandler( async (req: CustomRequest, res: Response) => {
 
     const crop = await Crop.findById(req.params.id)
 
-   if(!crop){
-       res.status(400)
-       throw new Error('Crop nu a fost gasit')
-   }
+    if (!crop) {
+        res.status(400)
+        throw new Error('Crop nu a fost gasit')
+    }
 
+    //check for user
+    if (!req.user) {
+        res.status(401)
+        throw new Error('Userul nu a fost gasit')
+    }
+    //must match logged user with crop user
+    if (crop.user.toString() === req.user.id || req.user.rol === 'Administrator') {
 
-   //check for user
-   if(!req.user) {
-       res.status(401)
-       throw new Error('Userul nu a fost gasit')
-   }
-   //must match logged user with crop user
-   if (crop.user.toString() == req.user.id || req.user.rol == 'Administrator'){
- 
-    await Crop.findByIdAndUpdate(req.params.id, req.body, {
-       new:true,
-   })
+        await Crop.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+        })
 
     } else {
-         res.status(401)
-            throw new Error('Userul nu este autorizatf')
+        res.status(401)
+        throw new Error('Userul nu este autorizatf')
     }
     const updatedCrop = await Crop.findById(req.params.id)
-
 
     res.status(200).json(updatedCrop)
 })
@@ -139,7 +148,7 @@ const PutCrop=asyncHandler( async (req: Request,res: Response)=> {
 //@route DELETE /api/crops
 //@acces Private
 
-const DeleteCrop =asyncHandler( async (req: Request ,res: Response) =>{
+const DeleteCrop =asyncHandler( async (req: CustomRequest ,res: Response) =>{
 
     const crop = await Crop.findById(req.params.id)
 

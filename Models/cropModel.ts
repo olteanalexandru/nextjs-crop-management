@@ -1,48 +1,64 @@
-export {};
-var mongoose = require('mongoose')
+var mongoose = require('mongoose');
 
-
-
-const cropSchema = mongoose.Schema ({
+const cropSchema = mongoose.Schema(
+  {
     //linking to user
     user: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'User',
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'User',
     },
 
-    titlu: {
-        type:String,
-        required:[true,'Lipseste titlu'],
+    cropName: {
+      type: String,
+      required: [true, 'Lipseste numele culturii'],
     },
-    descriere: {
-        type:String,
-        required:[true,'Lipseste descrierea'],
+    cropType: {
+      type: String,
+      required: [true, 'Lipseste tipul culturii'],
     },
-    text: {
-        type:String,
-        required:false,
+    cropVariety: {
+      type: String,
+      required: [true, 'Lipseste soiul culturii'],
     },
-    image: {
-        type:String,
-        required:false,
+    plantingDate: {
+      type: String,
+      required: [true, 'Lipseste data plantarii'],
+    },
+    harvestingDate: {
+      type: String,
+      required: [true, 'Lipseste data recoltarii'],
+    },
+    description: {
+      type: String,
+      required: [true, 'Lipseste descrierea'],
+    },
+    imageUrl: {
+      type: String,
+      required: false,
+    },
+    soilType: {
+      type: String,
+      required: [true, 'Lipseste tipul de sol'],
+    },
+    climate: {
+      type: String,
+      required: [true, 'Lipseste clima'],
     },
     selectare: {
-        type: Boolean,
-        required:false,
+      type: Boolean,
+      required: false,
     },
     selectareBy: {
-        type: String,
-        required: false,
-        ref: 'User',
-        
-    }
-},
- 
-{
-    
-    timestamps: true,
-}
-)
+      type: String,
+      required: false,
+      ref: 'User',
+    },
+  },
 
-module.exports = mongoose.model('Crop',cropSchema)
+  {
+    timestamps: true,
+  }
+);
+
+module.exports = mongoose.model('Crop', cropSchema);
