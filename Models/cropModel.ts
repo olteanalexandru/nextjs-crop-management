@@ -1,4 +1,5 @@
-var mongoose = require('mongoose');
+export {};
+const mongoose = require('mongoose');
 
 const cropSchema = mongoose.Schema(
   {
@@ -8,6 +9,17 @@ const cropSchema = mongoose.Schema(
       required: true,
       ref: 'User',
     },
+
+    selectare: {
+      type: Boolean,
+      required:false,
+  },
+  selectareBy: {
+      type: String,
+      required: false,
+      ref: 'User',
+      
+  },
 
     cropName: {
       type: String,
@@ -41,24 +53,28 @@ const cropSchema = mongoose.Schema(
       type: String,
       required: [true, 'Lipseste tipul de sol'],
     },
-    climate: {
-      type: String,
-      required: [true, 'Lipseste clima'],
-    },
-    selectare: {
-      type: Boolean,
+    fertilizers: {
+      type: [String],
       required: false,
     },
-    selectareBy: {
-      type: String,
+    pests: {
+      type: [String],
       required: false,
-      ref: 'User',
+    },
+    diseases: {
+      type: [String],
+      required: false,
+    },
+    ItShouldNotBeRepeatedForXYears: {
+      type: Number,
+      required: false,
     },
   },
-
   {
     timestamps: true,
   }
 );
 
 module.exports = mongoose.model('Crop', cropSchema);
+
+
