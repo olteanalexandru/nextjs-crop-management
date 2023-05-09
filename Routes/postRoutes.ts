@@ -9,6 +9,8 @@ router.route('/posts').get(getAllPosts)
 router.route('/posts/:id').get(GetSpecific)
 router.route('/:id').delete(protect, deletePost).put(protect, updatePost)
 
+
+
 module.exports = router
 
 

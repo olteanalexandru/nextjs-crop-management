@@ -15,6 +15,10 @@ const rotationSchema = mongoose.Schema(
         type: Number,
         required: [true, 'Lipseste numarul de diviziuni'],
       },
+      rotationName: {
+        type: String,
+        required: [true, 'Lipseste numele rotatiei'],
+      },
       crops: [
         {
           type: mongoose.Schema.Types.ObjectId,

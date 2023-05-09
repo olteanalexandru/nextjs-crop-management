@@ -65,6 +65,10 @@ const cropSchema = mongoose.Schema(
       type: [String],
       required: false,
     },
+    requiredDaysToMature: {
+      type: Number,
+      required: false,
+    },
     ItShouldNotBeRepeatedForXYears: {
       type: Number,
       required: false,
