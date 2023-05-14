@@ -3,13 +3,11 @@ const mongoose = require('mongoose');
 
 const cropSchema = mongoose.Schema(
   {
-    //linking to user
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'User',
     },
-
     selectare: {
       type: Boolean,
       required:false,
@@ -20,38 +18,45 @@ const cropSchema = mongoose.Schema(
       ref: 'User',
       
   },
-
     cropName: {
       type: String,
       required: [true, 'Lipseste numele culturii'],
     },
     cropType: {
       type: String,
-      required: [true, 'Lipseste tipul culturii'],
+      required: false,
     },
     cropVariety: {
       type: String,
-      required: [true, 'Lipseste soiul culturii'],
+      required: false,
     },
     plantingDate: {
       type: String,
-      required: [true, 'Lipseste data plantarii'],
+      required: false,
     },
     harvestingDate: {
       type: String,
-      required: [true, 'Lipseste data recoltarii'],
+      required: false,
     },
     description: {
       type: String,
-      required: [true, 'Lipseste descrierea'],
+      required: false,
     },
     imageUrl: {
-      type: String,
+      type: String, // Ensure the data type matches how it's used in the controller
       required: false,
     },
     soilType: {
       type: String,
-      required: [true, 'Lipseste tipul de sol'],
+      required: false,
+    },
+    climate: { // Add missing field
+      type: String,
+      required: false,
+    },
+    ItShouldNotBeRepeatedForXYears: {
+      type: Number,
+      required: false,
     },
     fertilizers: {
       type: [String],
@@ -65,11 +70,15 @@ const cropSchema = mongoose.Schema(
       type: [String],
       required: false,
     },
-    requiredDaysToMature: {
+    nitrogenSupply: {
       type: Number,
       required: false,
     },
-    ItShouldNotBeRepeatedForXYears: {
+    nitrogenDemand: {
+      type: Number,
+      required: false,
+    },
+    soilResidualNitrogen: { 
       type: Number,
       required: false,
     },
@@ -80,5 +89,3 @@ const cropSchema = mongoose.Schema(
 );
 
 module.exports = mongoose.model('Crop', cropSchema);
-
-

@@ -1,14 +1,7 @@
 export {};
 var mongoose = require('mongoose')
 
-// type ModelDataType = {
-//     id : string;
-//     title: string;
-//     brief: string;
-//     description: string;
-//     image: string;
-//     user: string;
-// }
+
 
 const postSchema = mongoose.Schema ({
     //linking to user

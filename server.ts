@@ -19,6 +19,6 @@ app.use(cors());
 app.use('/api/posts', require('./routes/postRoutes'))
 app.use('/api/crops', require('./routes/cropRoutes'))
 app.use('/api/users', require('./routes/userRoutes'))
-app.use(errorHandler)
+app.use(errorHandler) 
 
 app.listen (port, () => console.log('listening on port ' + port))

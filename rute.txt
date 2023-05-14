@@ -300,3 +300,194 @@ CulturaStore --> RotatieForm: Returns crops data
 RotatieForm --> Dashboard: Returns crops data
 Dashboard -> RotatieItem: Display crops data
 @enduml
+
+
+
+
+{
+  "fieldSize": 555,
+  "numberOfDivisions": 5,
+  "rotationName": "test",
+  "crops": [
+    {
+      "_id": "6460cfe10df4073565a3b9f9",
+      "user": "643fb193f99adba42ce20441",
+      "cropName": "Porumb",
+      "cropType": "Cereală",
+      "cropVariety": "Iubirea",
+      "plantingDate": "2023-04-15",
+      "harvestingDate": "2023-10-01",
+      "description": "Porumbul este o cultură importantă pentru economia României",
+      "soilType": "Argilos",
+      "climate": "Temperat",
+      "ItShouldNotBeRepeatedForXYears": 3,
+      "fertilizers": [
+        "NPK"
+      ],
+      "pests": [
+        "Larvele de gândac"
+      ],
+      "diseases": [
+        "Fuzarioza"
+      ],
+      "nitrogenSupply": 200,
+      "nitrogenDemand": 300,
+      "createdAt": "2023-05-14T12:11:13.736Z",
+      "updatedAt": "2023-05-14T18:28:11.486Z",
+      "__v": 0,
+      "selectare": true,
+      "selectareBy": "643fb193f99adba42ce20441",
+      "soilResidualNitrogen": 0
+    },
+    {
+      "_id": "6460cfe10df4073565a3b9f7",
+      "user": "643fb193f99adba42ce20441",
+      "cropName": "Grau",
+      "cropType": "Cereală",
+      "cropVariety": "Aurora",
+      "plantingDate": "2023-09-15",
+      "harvestingDate": "2024-06-01",
+      "description": "Grâul este o cereală de bază în România",
+      "soilType": "Argilos",
+      "climate": "Temperat",
+      "ItShouldNotBeRepeatedForXYears": 2,
+      "fertilizers": [
+        "NPK"
+      ],
+      "pests": [
+        "Gândacul de grâu"
+      ],
+      "diseases": [
+        "Rugina"
+      ],
+      "nitrogenSupply": 150,
+      "nitrogenDemand": 200,
+      "createdAt": "2023-05-14T12:11:13.730Z",
+      "updatedAt": "2023-05-14T18:28:11.486Z",
+      "__v": 0,
+      "selectare": true,
+      "selectareBy": "643fb193f99adba42ce20441",
+      "soilResidualNitrogen": 0
+    },
+    {
+      "_id": "6460cfe10df4073565a3b9fb",
+      "user": "643fb193f99adba42ce20441",
+      "cropName": "Secară",
+      "cropType": "Cereală",
+      "cropVariety": "Rubin",
+      "plantingDate": "2023-09-01",
+      "harvestingDate": "2024-07-01",
+      "description": "Secara este o cereală rezistentă la condiții dificile",
+      "soilType": "Argilos",
+      "climate": "Temperat rece",
+      "ItShouldNotBeRepeatedForXYears": 2,
+      "fertilizers": [
+        "NPK"
+      ],
+      "pests": [
+        "Gândacul de secară"
+      ],
+      "diseases": [
+        "Rugina neagră"
+      ],
+      "nitrogenSupply": 150,
+      "nitrogenDemand": 200,
+      "createdAt": "2023-05-14T12:11:13.832Z",
+      "updatedAt": "2023-05-14T18:28:11.487Z",
+      "__v": 0,
+      "selectare": true,
+      "selectareBy": "643fb193f99adba42ce20441",
+      "soilResidualNitrogen": 0
+    },
+    {
+      "_id": "6460cfe10df4073565a3b9fd",
+      "user": "643fb193f99adba42ce20441",
+      "cropName": "Triticale",
+      "cropType": "Cereală",
+      "cropVariety": "Titus",
+      "plantingDate": "2023-09-10",
+      "harvestingDate": "2024-06-20",
+      "description": "Triticale este o cereală hibridă, o încrucișare între grâu și secară",
+      "soilType": "Argilos",
+      "climate": "Temperat",
+      "ItShouldNotBeRepeatedForXYears": 2,
+      "fertilizers": [
+        "NPK"
+      ],
+      "pests": [
+        "Moliile de cereale"
+      ],
+      "diseases": [
+        "Fuzarioza"
+      ],
+      "nitrogenSupply": 160,
+      "nitrogenDemand": 210,
+      "createdAt": "2023-05-14T12:11:13.834Z",
+      "updatedAt": "2023-05-14T18:28:11.487Z",
+      "__v": 0,
+      "selectare": true,
+      "selectareBy": "643fb193f99adba42ce20441",
+      "soilResidualNitrogen": 0
+    },
+    {
+      "_id": "6460cfe20df4073565a3ba03",
+      "user": "643fb193f99adba42ce20441",
+      "cropName": "Ovăz",
+      "cropType": "Cereală",
+      "cropVariety": "Albina",
+      "plantingDate": "2023-03-20",
+      "harvestingDate": "2023-08-10",
+      "description": "Ovăzul este cultivat pentru grăunțe și furaj",
+      "soilType": "Nisipos",
+      "climate": "Temperat rece",
+      "ItShouldNotBeRepeatedForXYears": 2,
+      "fertilizers": [
+        "NPK"
+      ],
+      "pests": [
+        "Gândacul de ovăz"
+      ],
+      "diseases": [
+        "Făinarea"
+      ],
+      "nitrogenSupply": 140,
+      "nitrogenDemand": 200,
+      "createdAt": "2023-05-14T12:11:14.124Z",
+      "updatedAt": "2023-05-14T18:28:11.487Z",
+      "__v": 0,
+      "selectare": true,
+      "selectareBy": "643fb193f99adba42ce20441",
+      "soilResidualNitrogen": 0
+    },
+    {
+      "_id": "6460cfe20df4073565a3ba05",
+      "user": "643fb193f99adba42ce20441",
+      "cropName": "Orz",
+      "cropType": "Cereală",
+      "cropVariety": "Spring",
+      "plantingDate": "2023-04-01",
+      "harvestingDate": "2023-08-15",
+      "description": "Orzul este o cereală versatilă, folosită în special pentru bere",
+      "soilType": "Nisipos",
+      "climate": "Temperat",
+      "ItShouldNotBeRepeatedForXYears": 3,
+      "fertilizers": [
+        "NPK"
+      ],
+      "pests": [
+        "Afide"
+      ],
+      "diseases": [
+        "Antracnoza"
+      ],
+      "nitrogenSupply": 120,
+      "nitrogenDemand": 180,
+      "createdAt": "2023-05-14T12:11:14.126Z",
+      "updatedAt": "2023-05-14T18:28:11.487Z",
+      "__v": 0,
+      "selectare": true,
+      "selectareBy": "643fb193f99adba42ce20441",
+      "soilResidualNitrogen": 0
+    }
+  ]
+}

@@ -6,6 +6,7 @@ export interface Response {
     new (): any;
     json: { (arg0: any): void; new (): any };
   };
+  json: (arg0: any) => void;
 }
 
 export interface Crop {
@@ -33,16 +34,18 @@ export interface Crop {
   fieldSize: number;
   numberOfDivisions: number;
   rotationName: string;
+  crops: Crop[];
+  division: number;
+  maxYears: number;
 }
 
 export interface CropRotationInput {
+  rotationName: string;
   crops: Crop[];
   fieldSize: number;
   numberOfDivisions: number;
-  maxYears?: number;
-  nitrogenSupply?: number;
-  nitrogenDemand?: number;
-  soilResidualNitrogen?: number;
+  maxYears: number;
+ 
 }
 
 export interface Rotation {
@@ -56,7 +59,8 @@ export interface Rotation {
 
 export interface CropRotationItem {
   division: number;
-  crop: Crop;
+  crop: string | string[] | undefined | any;
+  
   plantingDate: string;
   harvestingDate: string;
   divisionSize: number;
@@ -71,5 +75,6 @@ export interface CustomRequest extends Request {
   body: Crop;
   params: {
     id: string;
+    cropName: string;
   };
 }

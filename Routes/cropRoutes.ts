@@ -1,16 +1,18 @@
 export {};
 const express = require('express')
 const router = express.Router()
-const { getCrop,SetCrop,PutCrop,DeleteCrop , getAllCrops , GetSpecific ,SetSelectare, generateRotation, addCropRecommendation} = require ('../Controllers/cropController') 
+const { getCrop,SetCrop,PutCrop,DeleteCrop , getAllCrops , GetSpecific ,SetSelectare, generateCropRotation, addCropRecommendation, getCropRecommendations,getCropRotation} = require ('../Controllers/cropController') 
 const { protect } = require('../Middleware/authMiddleware')
 
 
 
 
-router.route('/').get(protect,getCrop).post(protect,SetCrop) 
+router.route('/').get(protect,getCrop).post(protect,SetCrop).put(protect,SetCrop)
 router.route('/crops').get(getAllCrops)
-router.route('/crops/cropRotation').post(protect,generateRotation).get(protect,generateRotation).put(protect,generateRotation).put(protect,addCropRecommendation)
-router.route('/crops/:id').get(GetSpecific).post(protect,SetSelectare).put(protect,PutCrop).put(protect,SetSelectare)
-router.route('/:id').put(protect,PutCrop).delete(protect,DeleteCrop)
+router.route('/cropRecommendations').get(protect,getCropRecommendations)
+router.route('/cropRotation').post(protect,generateCropRotation).put(protect,addCropRecommendation).get(protect,getCropRotation)
+router.route('/cropSelect/:id').post(protect,SetSelectare).put(protect,SetSelectare)
+router.route('/crops/:id').put(protect,PutCrop)
+router.route('/:id').delete(protect,DeleteCrop).get(GetSpecific)
 
 module.exports = router ; 
