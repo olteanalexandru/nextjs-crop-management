@@ -77,37 +77,27 @@ const SetCrop = asyncHandler(async (req: CustomRequest, res: Response) => {
 //@route /api/crops/crops/:id
 //@acces Private
 const SetSelectare = asyncHandler(async (req: CustomRequest, res: Response) => {
-  const crop = await Crop.findById(req.params.id);
-  if (!crop) {
-    res.status(403);
-    throw new Error('Nu a fost gasit documentul');
-  }
+     const crop = await Crop.findById(req.params.id)
+if (!crop){
+       res.status(403)
+      throw new Error('Nu a fost gasit documentul')}
     
-  if (req.body.selectare === undefined) {
-    res.status(400);
-    throw new Error('Lipsa date selectare');
-  }
+   if (!req.body.selectare){
+         res.status(400)
+        throw new Error('Lipsa date selectare') };
 
-  if (!req.user) {
-    res.status(401);
-    throw new Error('Trebuie sa fi logat');
-  }
+         if (!req.user){
+           res.status(401)
+            throw new Error('Trebuie sa fi logat') };
 
-  let selectare = req.body.selectare;
-  let selectareBy = req.body._id;
+  const selectareCrop = 
+await Crop.findByIdAndUpdate(req.params.id ,  {
+    selectare:req.body.selectare,
+    selectareBy:req.body._id
+ }
+)
 
-  if (!selectare) {
-    // Deselecting
-    selectare = false;
-    selectareBy = null;
-  }
-
-  const selectareCrop = await Crop.findByIdAndUpdate(req.params.id, {
-    selectare: selectare,
-    selectareBy: selectareBy
-  });
-
-  res.status(200).json(selectareCrop);
+     res.status(200).json(selectareCrop)
 });
 
 
@@ -246,11 +236,6 @@ const getCropRecommendations = asyncHandler(async (req: CustomRequest, res: Resp
 });
 
 
-function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<number, Map<Crop, number>>, division: number): boolean {
-  const divisionLastUsedYear = lastUsedYear.get(division) || new Map<Crop, number>();
-  const lastUsed = divisionLastUsedYear.get(crop) || 0;
-  return year - lastUsed > crop.ItShouldNotBeRepeatedForXYears;
-}
 
 //@route PUT /api/crops/recommendations
 //@acces Admin
@@ -271,68 +256,78 @@ const generateCropRotation = asyncHandler(async (req: CustomRequest, res: Respon
   }
 
   const rotationPlan: Map<number, CropRotationItem[]> = new Map();
-  const lastUsedYear: Map<number, Map<Crop, number>> = new Map();
-  for (let division = 1; division <= numberOfDivisions; division++) {
-    const divisionLastUsedYear: Map<Crop, number> = new Map();
-    crops.forEach(crop => {
-      divisionLastUsedYear.set(crop, 0 - crop.ItShouldNotBeRepeatedForXYears);
-    });
-    lastUsedYear.set(division, divisionLastUsedYear);
-  }
+  const lastUsedYear: Map<string, number> = new Map();
+  crops.forEach(crop => {
+    lastUsedYear.set(crop._id, 0 - crop.ItShouldNotBeRepeatedForXYears);
+  });
 
   function hasSharedPests(crop1: Crop, crop2: Crop): boolean {
     return crop1.pests.some((pest) => crop2.pests.includes(pest));
   }
 
   for (let year = 1; year <= maxYears; year++) {
-    let yearlyPlan = [];
-    rotationPlan.set(year, yearlyPlan);
-
     for (let division = 1; division <= numberOfDivisions; division++) {
       const prevCrop = rotationPlan.get(year - 1)?.find((item) => item.division === division)?.crop;
 
+      const cropIsAvailable = (crop: Crop, division: number) => {
+        const lastUsed = lastUsedYear.get(crop._id) || 0;
+        const notRepeated = year - lastUsed >= crop.ItShouldNotBeRepeatedForXYears;
+        
+        let notSameDivisionInCurrentYear = true;
+        let notUsedInPreviousXYears = true;
+        
+        for (let y = year; y > year - crop.ItShouldNotBeRepeatedForXYears && y > 0; y--) {
+            if (rotationPlan.get(y)?.some(item => item.division === division && item.crop._id === crop._id)) {
+                notSameDivisionInCurrentYear = false;
+            }
+            if (rotationPlan.get(y)?.some(item => item.crop._id === crop._id)) {
+                notUsedInPreviousXYears = false;
+            }
+        }
+    
+        // console.log('Crop:', crop.cropName);
+        // console.log('Not repeated:', notRepeated);
+        // console.log('Not same division in current year:', notSameDivisionInCurrentYear);
+        // console.log('Not used in previous X years:', notUsedInPreviousXYears);
+      
+        return notRepeated && notSameDivisionInCurrentYear && notUsedInPreviousXYears;
+    };
+
+      let crop = null;
       if (prevCrop) {
-        const totalNitrogen = prevCrop.nitrogenSupply + (prevCrop.soilResidualNitrogen || 0);
+        const totalNitrogen = prevCrop.nitrogenSupply + ( prevCrop.soilResidualNitrogen || 0) ;
         const nitrogenPerDivision = totalNitrogen / numberOfDivisions;
-        const divisionSize = fieldSize / numberOfDivisions;
-        const sortedCrops = sortCropsByNitrogenBalance(crops, nitrogenPerDivision, (prevCrop.soilResidualNitrogen || 0));
-        const crop = sortedCrops.find((c) => !hasSharedPests(c, prevCrop) && cropIsAvailable(c, year, lastUsedYear, division));
-
-        if (crop) {
-          lastUsedYear.get(division)?.set(crop, year);
-          const plantingDate = new Date(crop.plantingDate);
-          plantingDate.setFullYear(plantingDate.getFullYear() + year - 1);
-
-          const harvestingDate = new Date(crop.harvestingDate);
-          harvestingDate.setFullYear(harvestingDate.getFullYear() + year - 1);
-
-          const nitrogenBalance = calculateNitrogenBalance(crop, nitrogenPerDivision, (prevCrop.soilResidualNitrogen || 0));
-
-          rotationPlan.set(year, [...(rotationPlan.get(year) || []), {
-            division,
-            crop,
-            plantingDate: plantingDate.toISOString().substring(0, 10),
-            harvestingDate: harvestingDate.toISOString().substring(0, 10),
-            divisionSize,
-            nitrogenBalance,
-          }]);
-        }
+        const divisionSize = fieldSize / numberOfDivisions; 
+        const sortedCrops = sortCropsByNitrogenBalance(crops, nitrogenPerDivision, ( prevCrop.soilResidualNitrogen || 0));
+        crop = sortedCrops.find((c) => !hasSharedPests(c, prevCrop) && cropIsAvailable(c, division)) || sortedCrops.find(c => cropIsAvailable(c, division)) || sortedCrops[0];
       } else {
-        const cropIndex = (division + year - 2) % crops.length;
-        const crop = crops[cropIndex];
-        const totalNitrogen = crop.nitrogenSupply + (crop.soilResidualNitrogen || 0)
+        let cropIndex = (division + year - 2) % crops.length;
+        crop = crops[cropIndex];
+        let counter = 0;
+        while (!cropIsAvailable(crop, division) && counter < crops.length) {
+          cropIndex = (cropIndex + 1) % crops.length;
+          crop = crops[cropIndex];
+          counter++;
+        }
+        if (counter === crops.length) {
+          // All crops have been checked and none are available.
+          crop = null;
+        }
+      }
+
+      if (crop) {
+        lastUsedYear.set(crop._id, year);
+        const plantingDate = new Date(crop.plantingDate);
+        plantingDate.setFullYear(plantingDate.getFullYear() + year - 1);
+      
+        const harvestingDate = new Date(crop.harvestingDate);
+        harvestingDate.setFullYear(harvestingDate.getFullYear() + year - 1);
+      
+        const totalNitrogen = crop.nitrogenSupply + (crop.soilResidualNitrogen || 0);
         const nitrogenPerDivision = totalNitrogen / numberOfDivisions;
         const divisionSize = fieldSize / numberOfDivisions;
-
-        if (cropIsAvailable(crop, year, lastUsedYear, division)) {
-          lastUsedYear.get(division)?.set(crop, year);
-          const plantingDate = new Date(crop.plantingDate);
-          plantingDate.setFullYear(plantingDate.getFullYear() + year - 1);
-          const harvestingDate = new Date(crop.harvestingDate);
-          harvestingDate.setFullYear(harvestingDate.getFullYear() + year - 1);
-
-          const nitrogenBalance = calculateNitrogenBalance(crop, nitrogenPerDivision, 0);
-
+        const nitrogenBalance = calculateNitrogenBalance(crop, nitrogenPerDivision, (crop.soilResidualNitrogen || 0));
+        if(cropIsAvailable(crop, division)) {
           rotationPlan.set(year, [...(rotationPlan.get(year) || []), {
             division,
             crop,
@@ -342,10 +337,21 @@ const generateCropRotation = asyncHandler(async (req: CustomRequest, res: Respon
             nitrogenBalance,
           }]);
         }
+        
+      } else {
+        rotationPlan.set(year, [...(rotationPlan.get(year) || []), {
+          division,
+          crop ,
+          plantingDate: "n/a",
+          harvestingDate: "n/a",
+          divisionSize: 0,
+          nitrogenBalance: 0,
+        }]);
       }
     }
   }
 
+  // Save rotation plan to the database
   const rotation = new Rotation({
     user: req.user.id,
     fieldSize,
@@ -355,18 +361,45 @@ const generateCropRotation = asyncHandler(async (req: CustomRequest, res: Respon
     rotationPlan: Array.from(rotationPlan.entries()).map(([year, rotationItems]) => ({ year, rotationItems })),
   });
 
-  const createdRotation = await rotation.save();
+  let createdRotation ;
+  console.log("Before saving the rotation");
+   try {
+    
+    createdRotation = await rotation.save();
+    console.log("After saving the rotation");
+  } catch (error) {
+    console.error("Error while saving the rotation", error);
+    res.status(500);
+    throw new Error('Failed to save rotation');
+  }
+  console.log("Before updating crops");
+  let cropsToUpdate ;
+  try {
+    cropsToUpdate = await Crop.find({ _id: { $in: input.crops } });
+  } catch (error) {
+    res.status(500);
+    throw new Error('Failed to fetch crops');
+  }
 
-  const cropsToUpdate = await Crop.find({ _id: { $in: input.crops } });
-
+  // Update the soilResidualNitrogen for each crop
   const updatePromises = cropsToUpdate.map(async (crop) => {
+    // Calculate the actual residual nitrogen value for the crop
     const totalNitrogen = crop.nitrogenSupply + (crop.soilResidualNitrogen || 0);
     const nitrogenPerDivision = totalNitrogen / numberOfDivisions;
     const nitrogenBalance = calculateNitrogenBalance(crop, nitrogenPerDivision, crop.soilResidualNitrogen || 0);
     crop.soilResidualNitrogen = nitrogenBalance;
-    await crop.save();
+
+    // Save the updated crop
+    console.log("Before saving the crop");
+    try {
+      await crop.save();
+      console.log("After saving the crop");
+    } catch (error) {
+      throw new Error('Failed to update crop');
+    }
   });
 
+  // Wait for all the update operations to complete
   await Promise.all(updatePromises);
 
   if (createdRotation) {
@@ -377,18 +410,19 @@ const generateCropRotation = asyncHandler(async (req: CustomRequest, res: Respon
   }
 });
 
+// Helper function to sort crops by nitrogen balance
 function sortCropsByNitrogenBalance(crops: Crop[], nitrogenPerDivision: number, soilResidualNitrogen: number) {
   return crops.sort((a, b) => {
-    const balanceA = calculateNitrogenBalance(a, nitrogenPerDivision, ( soilResidualNitrogen || 0));
-    const balanceB = calculateNitrogenBalance(b, nitrogenPerDivision, ( soilResidualNitrogen || 0));
+    const balanceA = calculateNitrogenBalance(a, nitrogenPerDivision, (soilResidualNitrogen || 0));
+    const balanceB = calculateNitrogenBalance(b, nitrogenPerDivision, (soilResidualNitrogen || 0));
     return balanceA - balanceB;
   });
 }
 
+// Helper function to calculate nitrogen balance
 function calculateNitrogenBalance(crop: Crop, nitrogenPerDivision: number, soilResidualNitrogen: number) {
-  return crop.nitrogenDemand - nitrogenPerDivision - ( soilResidualNitrogen || 0);
+  return crop.nitrogenDemand - nitrogenPerDivision - (soilResidualNitrogen || 0);
 }
-
 // @desc    Get crop rotation by user 
 // @route   GET /api/crops/rotation
 // @access  Private
@@ -428,3 +462,5 @@ module.exports = {
   deleteCropRotation,
 
 };
+
+
