@@ -45,6 +45,7 @@ export interface CropRotationInput {
   fieldSize: number;
   numberOfDivisions: number;
   maxYears: number;
+  ResidualNitrogenSupply?: number;
  
 }
 

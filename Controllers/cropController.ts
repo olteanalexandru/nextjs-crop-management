@@ -262,7 +262,9 @@ const generateCropRotation = asyncHandler(async (req: CustomRequest, res: Respon
     crops,
     fieldSize,
     numberOfDivisions,
-    maxYears = 6,
+    maxYears ,
+    ResidualNitrogenSupply = 50,
+
   } = input;
 
   if (!crops || crops.length === 0) {
@@ -306,7 +308,7 @@ const generateCropRotation = asyncHandler(async (req: CustomRequest, res: Respon
           const harvestingDate = new Date(crop.harvestingDate);
           harvestingDate.setFullYear(harvestingDate.getFullYear() + year - 1);
 
-          const nitrogenBalance = calculateNitrogenBalance(crop, nitrogenPerDivision, (prevCrop.soilResidualNitrogen || 0));
+          const nitrogenBalance = calculateNitrogenBalance(crop, nitrogenPerDivision, (prevCrop.soilResidualNitrogen || ResidualNitrogenSupply));
 
           rotationPlan.set(year, [...(rotationPlan.get(year) || []), {
             division,
