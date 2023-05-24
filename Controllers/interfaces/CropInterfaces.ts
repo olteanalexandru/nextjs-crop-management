@@ -46,6 +46,9 @@ export interface CropRotationInput {
   numberOfDivisions: number;
   maxYears: number;
   ResidualNitrogenSupply?: number;
+  startYear?: number;
+  lastUsedYear ?: Map<number, Map<Crop, number>>
+  lastUsedYearInput ?: Map<number, Map<Crop, number>>
  
 }
 
@@ -70,12 +73,22 @@ export interface CropRotationItem {
 
 export interface CustomRequest extends Request {
   user: {
-    id: number;
+    _id:  string;
+    id: string;
     rol: string;
+    numSelections: number;
   };
-  body: Crop;
+  body: Crop & {
+    nitrogenBalance: number;
+    rotationName: string;
+    year: number;
+    numSelections: number;
+  };
   params: {
     id: string;
     cropName: string;
+    year: string;
+    division: string;
+    rotationName: string;
   };
 }
