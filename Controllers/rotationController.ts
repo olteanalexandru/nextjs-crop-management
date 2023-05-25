@@ -83,7 +83,7 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
         if (prevCrop) {
           const totalNitrogen = prevCrop.nitrogenSupply + (prevCrop.soilResidualNitrogen || 0);
           const nitrogenPerDivision = totalNitrogen / numberOfDivisions;
-          const divisionSize = fieldSize / numberOfDivisions;
+          const divisionSize = parseFloat((fieldSize / numberOfDivisions).toFixed(2));
           const sortedCrops = sortCropsByNitrogenBalance(crops, nitrogenPerDivision, (prevCrop.soilResidualNitrogen || 0));
           let crop;
           for (const c of sortedCrops) {
@@ -123,7 +123,7 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
           const crop = crops[cropIndex];
           const totalNitrogen = crop.nitrogenSupply + (crop.soilResidualNitrogen || 0)
           const nitrogenPerDivision = totalNitrogen / numberOfDivisions;
-          const divisionSize = fieldSize / numberOfDivisions;
+          const divisionSize = parseFloat((fieldSize / numberOfDivisions).toFixed(2));
   
           if (cropIsAvailable(crop, year, lastUsedYear, division, req.user.id, req.user.numSelections)) {
             lastUsedYear.get(division)?.set(crop, year);
@@ -198,8 +198,12 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
   }
   
   function calculateNitrogenBalance(crop: Crop, nitrogenPerDivision: number, soilResidualNitrogen: number) {
-    return nitrogenPerDivision - crop.nitrogenDemand + ( soilResidualNitrogen || 0);
-  } 
+    const nitrogenBalance = nitrogenPerDivision - crop.nitrogenDemand + (soilResidualNitrogen || 0);
+    // No negative nitrogen balance
+    const balance = nitrogenBalance < 0 ? 0 : nitrogenBalance;
+    // Set nitrogen balance to 2 decimal places
+    return parseFloat(balance.toFixed(2));
+  }
   
   // @route PUT /api/crops/rotation/
   // @access Admin
@@ -257,6 +261,58 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
       }
     });
   });
+
+
+  // @route PUT /api/crops/rotation/divisionSize
+// @access Admin
+const updateDivisionSizeAndRedistribute = asyncHandler(async (req, res) => {
+  const { rotationName, division, newDivisionSize } = req.body;
+  
+  // Find the rotation for the given id
+  const rotation = await Rotation.findOne({ rotationName });
+
+  if (!rotation) {
+    res.status(404);
+    throw new Error('Rotation not found');
+  }
+
+  // Check if newDivisionSize is valid
+  if (newDivisionSize > rotation.fieldSize || newDivisionSize < 0) {
+    res.status(400);
+    throw new Error('Invalid division size');
+  }
+
+  // Calculate the remaining size to be distributed among the other divisions
+  const remainingSize = rotation.fieldSize - newDivisionSize;
+
+  // Calculate the size for the other divisions
+  const otherDivisionsSize = remainingSize / (rotation.numberOfDivisions - 1);
+
+  // Iterate over all the years
+  for (const yearPlan of rotation.rotationPlan) {
+    // Iterate over all divisions in a year
+    for (const rotationItem of yearPlan.rotationItems) {
+      if (rotationItem.division === division) {
+        // Update the specified division size
+        rotationItem.divisionSize = newDivisionSize;
+        rotationItem.directlyUpdated = true; // marking division as directly updated
+      } else if (!rotationItem.directlyUpdated) {
+        // Update the other divisions' size only if they haven't been directly updated
+        rotationItem.divisionSize = otherDivisionsSize;
+      }
+    }
+  }
+
+  // save the updated rotation
+  await rotation.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      rotation
+    }
+  });
+});
   
   
   
@@ -271,10 +327,7 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
       res.status(204);
       res.json('Nu s-a gasit nici o rotatie de culturi pentru acest utilizator');
     } 
-  
-  
-  
-  
+
   });
   
   const deleteCropRotation = asyncHandler(async (req: CustomRequest, res: Response) => {
@@ -295,4 +348,5 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
     getCropRotation,
     deleteCropRotation,
     updateNitrogenBalanceAndRegenerateRotation,
+    updateDivisionSizeAndRedistribute,
   };

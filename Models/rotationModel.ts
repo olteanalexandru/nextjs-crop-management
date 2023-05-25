@@ -30,6 +30,10 @@ const rotationItemSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
+  directlyUpdated: { 
+    type: Boolean,
+    default: false, 
+  },
 });
 
 const rotationYearSchema = mongoose.Schema({
