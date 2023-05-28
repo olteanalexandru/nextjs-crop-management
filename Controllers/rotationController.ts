@@ -33,7 +33,7 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
   //@route PUT /api/crops/recommendations
   //@acces Admin
   const generateCropRotation = asyncHandler(async (req: CustomRequest, res: Response) => {
-    const input: CropRotationInput = req.body;
+    const input: CropRotationInput = req.body;  
     
     const {
       rotationName,
@@ -41,9 +41,10 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
       fieldSize,
       numberOfDivisions,
       maxYears ,
-      ResidualNitrogenSupply = 500,
+      ResidualNitrogenSupply ,
   
     } = input;
+    const TheResidualNitrogenSupply = ResidualNitrogenSupply ?? 500;
   
     if (!crops || crops.length === 0) {
       res.status(400);
@@ -52,6 +53,7 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
   
     const rotationPlan: Map<number, CropRotationItem[]> = new Map();
     const lastUsedYear: Map<number, Map<Crop, number>> = new Map();
+    const usedCropsInYear: Map<number, Set<string>> = new Map();
     
   
     for (let division = 1; division <= numberOfDivisions; division++) {
@@ -74,6 +76,7 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
   
   
     for (let year = 1; year <= maxYears; year++) {
+      usedCropsInYear.set(year, new Set<string>());
       let yearlyPlan = [];
       rotationPlan.set(year, yearlyPlan);
   
@@ -101,8 +104,13 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
           }
   // If a crop is found, add it to the rotation plan
           if (crop) {
+            if (!usedCropsInYear.has(year)) {
+              usedCropsInYear.set(year, new Set<string>());
+            }
             lastUsedYear.get(division)?.set(crop, year);
+            // Add crop to used crops in year
   usedCropsInYear.get(year)?.add(crop._id) || usedCropsInYear.set(year, new Set([crop._id]));
+             // Calculate planting and harvesting dates
             const plantingDate = new Date(crop.plantingDate);
             plantingDate.setFullYear(plantingDate.getFullYear() + year - 1);
   
@@ -126,14 +134,16 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
           const crop = crops[cropIndex];
           const divisionSize = parseFloat((fieldSize / numberOfDivisions).toFixed(2));
   
+
           if (cropIsAvailable(crop, year, lastUsedYear, division, req.user.id, req.user.numSelections)) {
             lastUsedYear.get(division)?.set(crop, year);
             const plantingDate = new Date(crop.plantingDate);
             plantingDate.setFullYear(plantingDate.getFullYear() + year - 1);
             const harvestingDate = new Date(crop.harvestingDate);
             harvestingDate.setFullYear(harvestingDate.getFullYear() + year - 1);
+            const soilResidualNitrogen: number = crop.soilResidualNitrogen ?? TheResidualNitrogenSupply;
 
-            const nitrogenBalance = calculateNitrogenBalance(crop, crop.nitrogenSupply, (crop.soilResidualNitrogen || ResidualNitrogenSupply));
+            const nitrogenBalance = calculateNitrogenBalance(crop, crop.nitrogenSupply, soilResidualNitrogen);
   
             rotationPlan.set(year, [...(rotationPlan.get(year) || []), {
               division,
@@ -174,10 +184,8 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
     await user.save();
   
     const updatePromises = cropsToUpdate.map((crop) => {
-      const totalNitrogen = crop.nitrogenSupply + (crop.soilResidualNitrogen || 0);
-      const nitrogenPerDivision = 500;
-      const nitrogenBalance = 500;
-      crop.soilResidualNitrogen = nitrogenBalance;
+      // Update the crop's soilResidualNitrogen with the one in the last year of the rotation
+      crop.soilResidualNitrogen =  rotationPlan.get(maxYears)?.find((item) => item.crop._id === crop._id)?.nitrogenBalance;
       return crop.save();
     });
     await Promise.all(updatePromises);
@@ -190,7 +198,7 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
     }
   });
   
-  function sortCropsByNitrogenBalance(crops: Crop[], nitrogenPerDivision: number, soilResidualNitrogen?: number) {
+  function sortCropsByNitrogenBalance(crops: Crop[], nitrogenPerDivision: number, soilResidualNitrogen: number) {
     return crops.sort((a, b) => {
       const balanceA = calculateNitrogenBalance(a, nitrogenPerDivision,  soilResidualNitrogen );
       const balanceB = calculateNitrogenBalance(b, nitrogenPerDivision,  soilResidualNitrogen );
@@ -198,11 +206,12 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
     });
   }
   
-  function calculateNitrogenBalance(crop: Crop, nitrogenPerDivision: number, soilResidualNitrogen?: number) {
-  console.log("soilResidualNitrogen?" + soilResidualNitrogen + "nitrogenPerDivision:  " + nitrogenPerDivision)
+  function calculateNitrogenBalance(crop: Crop, nitrogenPerDivision: number, soilResidualNitrogen: number) {
+  console.log("soilResidualNitrogen?: " + soilResidualNitrogen + " nitrogenPerDivision:  " + nitrogenPerDivision)
 
-    const nitrogenBalance = nitrogenPerDivision - crop.nitrogenDemand + (soilResidualNitrogen);
+    const nitrogenBalance = nitrogenPerDivision - crop.nitrogenDemand + soilResidualNitrogen;
     // No negative nitrogen balance
+    console.log("Nitbalance: " + nitrogenBalance)
     const balance = nitrogenBalance < 0 ? 0 : nitrogenBalance;
     console.log("balance: " + balance)
     // Set nitrogen balance to 2 decimal places
