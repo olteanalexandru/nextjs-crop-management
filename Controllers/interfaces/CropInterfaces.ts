@@ -45,6 +45,7 @@ export interface CropRotationInput {
   fieldSize: number;
   numberOfDivisions: number;
   maxYears: number;
+  TheResidualNitrogenSupply?: number;
   ResidualNitrogenSupply?: number;
   startYear?: number;
   lastUsedYear ?: Map<number, Map<Crop, number>>
@@ -64,7 +65,6 @@ export interface Rotation {
 export interface CropRotationItem {
   division: number;
   crop: string | string[] | undefined | any;
-  
   plantingDate: string;
   harvestingDate: string;
   divisionSize: number;

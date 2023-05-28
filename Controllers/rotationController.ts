@@ -41,7 +41,7 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
       fieldSize,
       numberOfDivisions,
       maxYears ,
-      ResidualNitrogenSupply = 50,
+      ResidualNitrogenSupply = 500,
   
     } = input;
   
@@ -79,17 +79,19 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
   
       for (let division = 1; division <= numberOfDivisions; division++) {
         const prevCrop = rotationPlan.get(year - 1)?.find((item) => item.division === division)?.crop;
-  
+        const prevYear = rotationPlan.get(year - 1)?.find((item) => item.division === division);
+  // If there is a previous crop
         if (prevCrop) {
-          const totalNitrogen = prevCrop.nitrogenSupply + (prevCrop.soilResidualNitrogen || 0);
-          const nitrogenPerDivision = totalNitrogen / numberOfDivisions;
+          const nitrogenPerDivision = prevCrop.nitrogenSupply + prevYear.nitrogenBalance ;
           const divisionSize = parseFloat((fieldSize / numberOfDivisions).toFixed(2));
-          const sortedCrops = sortCropsByNitrogenBalance(crops, nitrogenPerDivision, (prevCrop.soilResidualNitrogen || 0));
+          const sortedCrops = sortCropsByNitrogenBalance(crops, nitrogenPerDivision, 0);
           let crop;
+          // Find a crop that is available and has no shared pests or diseases with the previous crop
           for (const c of sortedCrops) {
             const isAvailable = await cropIsAvailable(c, year, lastUsedYear, division, req.user.id, req.user.numSelections);
             if (!hasSharedPests(c, prevCrop) && !hasSharedDiseases(c, prevCrop) && isAvailable) {
               crop = c;
+              lastUsedYear.get(division)?.set(crop, year); // Update the last used year for the division
               break;
             }
           }
@@ -97,7 +99,7 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
           if (!crop) {
             continue; // Skip to next division if no crop is available
           }
-  
+  // If a crop is found, add it to the rotation plan
           if (crop) {
             lastUsedYear.get(division)?.set(crop, year);
   usedCropsInYear.get(year)?.add(crop._id) || usedCropsInYear.set(year, new Set([crop._id]));
@@ -107,7 +109,7 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
             const harvestingDate = new Date(crop.harvestingDate);
             harvestingDate.setFullYear(harvestingDate.getFullYear() + year - 1);
   
-            const nitrogenBalance = calculateNitrogenBalance(crop, nitrogenPerDivision, (prevCrop.soilResidualNitrogen || ResidualNitrogenSupply));
+            const nitrogenBalance = calculateNitrogenBalance(crop, nitrogenPerDivision, 0);
   
             rotationPlan.set(year, [...(rotationPlan.get(year) || []), {
               division,
@@ -118,11 +120,10 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
               nitrogenBalance,
             }]);
           }
+          // If there is no previous crop
         } else {
           const cropIndex = (division + year - 2) % crops.length;
           const crop = crops[cropIndex];
-          const totalNitrogen = crop.nitrogenSupply + (crop.soilResidualNitrogen || 0)
-          const nitrogenPerDivision = totalNitrogen / numberOfDivisions;
           const divisionSize = parseFloat((fieldSize / numberOfDivisions).toFixed(2));
   
           if (cropIsAvailable(crop, year, lastUsedYear, division, req.user.id, req.user.numSelections)) {
@@ -131,8 +132,8 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
             plantingDate.setFullYear(plantingDate.getFullYear() + year - 1);
             const harvestingDate = new Date(crop.harvestingDate);
             harvestingDate.setFullYear(harvestingDate.getFullYear() + year - 1);
-  
-            const nitrogenBalance = calculateNitrogenBalance(crop, nitrogenPerDivision, 0);
+
+            const nitrogenBalance = calculateNitrogenBalance(crop, crop.nitrogenSupply, (crop.soilResidualNitrogen || ResidualNitrogenSupply));
   
             rotationPlan.set(year, [...(rotationPlan.get(year) || []), {
               division,
@@ -174,8 +175,8 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
   
     const updatePromises = cropsToUpdate.map((crop) => {
       const totalNitrogen = crop.nitrogenSupply + (crop.soilResidualNitrogen || 0);
-      const nitrogenPerDivision = totalNitrogen / numberOfDivisions;
-      const nitrogenBalance = calculateNitrogenBalance(crop, nitrogenPerDivision, crop.soilResidualNitrogen || 0);
+      const nitrogenPerDivision = 500;
+      const nitrogenBalance = 500;
       crop.soilResidualNitrogen = nitrogenBalance;
       return crop.save();
     });
@@ -189,18 +190,21 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
     }
   });
   
-  function sortCropsByNitrogenBalance(crops: Crop[], nitrogenPerDivision: number, soilResidualNitrogen: number) {
+  function sortCropsByNitrogenBalance(crops: Crop[], nitrogenPerDivision: number, soilResidualNitrogen?: number) {
     return crops.sort((a, b) => {
-      const balanceA = calculateNitrogenBalance(a, nitrogenPerDivision, ( soilResidualNitrogen || 0));
-      const balanceB = calculateNitrogenBalance(b, nitrogenPerDivision, ( soilResidualNitrogen || 0));
+      const balanceA = calculateNitrogenBalance(a, nitrogenPerDivision,  soilResidualNitrogen );
+      const balanceB = calculateNitrogenBalance(b, nitrogenPerDivision,  soilResidualNitrogen );
       return balanceA - balanceB;
     });
   }
   
-  function calculateNitrogenBalance(crop: Crop, nitrogenPerDivision: number, soilResidualNitrogen: number) {
-    const nitrogenBalance = nitrogenPerDivision - crop.nitrogenDemand + (soilResidualNitrogen || 0);
+  function calculateNitrogenBalance(crop: Crop, nitrogenPerDivision: number, soilResidualNitrogen?: number) {
+  console.log("soilResidualNitrogen?" + soilResidualNitrogen + "nitrogenPerDivision:  " + nitrogenPerDivision)
+
+    const nitrogenBalance = nitrogenPerDivision - crop.nitrogenDemand + (soilResidualNitrogen);
     // No negative nitrogen balance
     const balance = nitrogenBalance < 0 ? 0 : nitrogenBalance;
+    console.log("balance: " + balance)
     // Set nitrogen balance to 2 decimal places
     return parseFloat(balance.toFixed(2));
   }

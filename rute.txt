@@ -491,3 +491,16 @@ Dashboard -> RotatieItem: Display crops data
     }
   ]
 }
+
+
+
+
+balans azot e la hectar deci ramane la fel dar in paranteză arată calcul după dimensiunea parcelei, ex: 1500 cu 87.5 hectar -> 130 azot total
+
+-azotul nu poate aparea cu minus, in caz de minus schimbam pe 0
+
+-algoritm calcul parcelă
+
+-mutare recomandări in backend
+
+-diagrame / explicatii algoritm
