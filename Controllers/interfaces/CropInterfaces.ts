@@ -28,7 +28,7 @@ export interface Crop {
   fertilizers?: string[];
   nitrogenSupply: number;
   nitrogenDemand: number;
-  soilResidualNitrogen: number;
+  soilResidualNitrogen: number | undefined | null;
   id: number;
   name: string;
   fieldSize: number;

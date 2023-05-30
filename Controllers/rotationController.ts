@@ -207,13 +207,9 @@ async function cropIsAvailable(crop: Crop, year: number, lastUsedYear: Map<numbe
   }
   
   function calculateNitrogenBalance(crop: Crop, nitrogenPerDivision: number, soilResidualNitrogen: number) {
-  console.log("soilResidualNitrogen?: " + soilResidualNitrogen + " nitrogenPerDivision:  " + nitrogenPerDivision)
-
     const nitrogenBalance = nitrogenPerDivision - crop.nitrogenDemand + soilResidualNitrogen;
     // No negative nitrogen balance
-    console.log("Nitbalance: " + nitrogenBalance)
     const balance = nitrogenBalance < 0 ? 0 : nitrogenBalance;
-    console.log("balance: " + balance)
     // Set nitrogen balance to 2 decimal places
     return parseFloat(balance.toFixed(2));
   }
