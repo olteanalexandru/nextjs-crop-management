@@ -37,6 +37,8 @@ export interface Crop {
   crops: Crop[];
   division: number;
   maxYears: number;
+  TheResidualNitrogenSupply?: number;
+  newDivisionSize: number;
 }
 
 export interface CropRotationInput {

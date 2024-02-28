@@ -1,4 +1,5 @@
-export{}
+//export 
+export {};
 const mongoose = require('mongoose');
 const Crop = require('./cropModel');
 
@@ -53,15 +54,15 @@ const rotationSchema = mongoose.Schema(
     },
     fieldSize: {
       type: Number,
-      required: [true, 'Lipseste marimea terenului'],
+      required: [true, 'Field size is required'],
     },
     numberOfDivisions: {
       type: Number,
-      required: [true, 'Lipseste numarul de diviziuni'],
+      required: [true, 'Number of divisions is required'],
     },
     rotationName: {
       type: String,
-      required: [true, 'Lipseste numele rotatiei'],
+      required: [true, 'Rotation name is required'],
     },
     crops: [
       {
@@ -76,6 +77,8 @@ const rotationSchema = mongoose.Schema(
   }
 );
 
+
+// Populate crops in rotation plan with crop names and crop varieties before sending response to client  
 rotationItemSchema.pre('save', function (next) {
   if (this.crop) {
     Crop.findById(this.crop, (err, crop) => {
@@ -88,4 +91,4 @@ rotationItemSchema.pre('save', function (next) {
   }
 });
 
-module.exports = mongoose.models.Rotation || mongoose.model('Rotation', rotationSchema);
+export default mongoose.models.Rotation || mongoose.model('Rotation', rotationSchema);

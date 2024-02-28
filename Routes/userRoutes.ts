@@ -2,14 +2,14 @@ export {};
 const express = require('express');
 const router = express.Router()
 const {protect, checkRole} = require('../middleware/authMiddleware')
-const {registerUser, loginUser, getMe, PutUser , getFermierUsers, deleteUser} = require('../Controllers/userController')
+import userController from '../Controllers/userController';
+const userControllerClass = new userController();
 
+router.post('/login', userControllerClass.loginUser)
+router.get('/me',protect, userControllerClass.getMe)
+router.route('/').put(userControllerClass.PutUser).post(userControllerClass.registerUser)
+router.route('/').get(protect, checkRole('Administrator'), userControllerClass.registerUser)
+router.route('/fermier').get(protect, userControllerClass.getFermierUsers);
+router.route('/:id').delete(protect, userControllerClass.deleteUser);
 
-router.post('/login', loginUser)
-router.get('/me',protect, getMe)
-router.route('/').put(PutUser).post(registerUser)
-router.route('/').get(protect, checkRole('Administrator'), registerUser)
-router.route('/fermier').get(protect, getFermierUsers);
-router.route('/:id').delete(protect, deleteUser);
-
-module.exports = router
+export default router;

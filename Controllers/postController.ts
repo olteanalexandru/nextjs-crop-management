@@ -1,148 +1,146 @@
-export {};
-
 const asyncHandler = require('express-async-handler');
 
-const Post = require('../models/postModel');
-
-// type ModelDataType = {
-//     id : string;
-//     title: string;
-//     brief: string;
-//     description: string;
-//     image: string;
-//     user: string;
-// }
-
-
+import Post from '../Models/postModel';
+import User from '../Models/userModel';
 interface Response {
-    status: (arg0: number) => { (): any; new(): any; json: { (arg0: any): void; new(): any } }
+    status: any;
+    json: (arg0: any) => void;
+    send: (arg0: string) => void;
 }
 interface Request {
     user: { id: number },
-    body: { title: string;
+    body: {
+        title: string;
         brief: string;
         description: string;
         image: string;
         id: string;
-
     }
     params: { id: number; }
 }
 
-//@route GET /api/posts
-//@acces Private
-const getPost = asyncHandler(async (req: Request, res: Response) => {
-    const posts = await Post.findById(req.params.id)
-    res.status(200).json(posts);
-    //res.status(200).json({message:'Get Posts'})
-});
 
-//@route GET /api/posts/posts
-//@acces Public
+class PostController {
 
-const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
+    //constructor
+    constructor() {
+        this.getPost = this.getPost.bind(this);
+        this.getAllPosts = this.getAllPosts.bind(this);
+        this.GetSpecific = this.GetSpecific.bind(this);
+        this.SetPost = this.SetPost.bind(this);
+        this.deletePost = this.deletePost.bind(this);
+        this.updatePost = this.updatePost.bind(this);
+    }
 
-    const posts = await Post.find({});
-    res.status(200).json(posts);
-    
+    router = require('express').Router();
 
-});
+    // //@route GET /api/posts
+    // //@acces Private
 
-//@route GET /api/posts/posts/:id
-//@acces Public
-const GetSpecific = asyncHandler(async (req: Request, res: Response) => {
-    const posts = await Post.findById(req.params.id);
-    res.status(200).json(posts);
-    //res.status(200).json({message:'Get Posts'})
-}
-);
+    getPost = asyncHandler(async (req: Request, res: Response) => {
+        const posts = await Post.findById(req.params.id);
+       res.status(200).json({ posts });
 
-//@route SET /api/posts
-//@acces Private
-const SetPost = asyncHandler(async (req: Request, res: Response) => {
-    if (!req.body.title) {
-        res.status(400);
-        throw new Error('Lipsa titlu');
-
-    };
-    if (!req.body.brief) {
-        res.status(400);
-        throw new Error('Lipsa brief');
-
-    };
-    if (!req.body.description) {
-        res.status(400);
-        throw new Error('Lipsa descriere');
-
-    };
-   
-    const post = new Post({
-        user: req.user.id,
-        title: req.body.title,
-        brief: req.body.brief,
-        description: req.body.description,
-        image: req.body.image,
+       
     });
 
-    const createdPost = await post.save();
-    res.status(201).json(createdPost);
-}
-);
+    // //@route GET /api/posts/posts
+    // //@acces Public
 
-//@route DELETE /api/posts/:id
-//@acces Private
-const deletePost = asyncHandler(async (req: Request, res: Response) => {
-    const post = await Post.findById(req.params.id);
-    if (post.user.toString() !== req.user.id) {
-        res.status(401);
-        throw new Error('Not authorized');
+    getAllPosts = asyncHandler(async (req: Request, res: Response) => {
+
+        
+        const posts = await Post.find({});
+        res.status(200).json(posts);
+
+
+    });
+
+    // //@route GET /api/posts/posts/:id
+    // //@acces Public
+
+    GetSpecific = asyncHandler(async (req: Request, res: Response) => {
+        const posts = await Post.findById(req.params.id);
+        res.status(200).json(posts);
+        //res.status(200).json({message:'Get Posts'})
     }
-    
-    if (post) {
-        await post.remove();
-        res.status(200).json({ message: 'Post removed' });
-    } else {
-        res.status(404);
-        throw new Error('Post not found');
+    );
+
+
+    // //@route SET /api/posts
+    // //@acces Private
+
+    SetPost = asyncHandler(async (req: Request, res: Response) => {
+        if (!req.body.title) {
+            res.status(400);
+            throw new Error('Lipsa titlu');
+
+        };
+        if (!req.body.brief) {
+            res.status(400);
+            throw new Error('Lipsa brief');
+
+        };
+        if (!req.body.description) {
+            res.status(400);
+            throw new Error('Lipsa descriere');
+
+        };
+
+        const post = new Post({
+            user: req.user.id,
+            title: req.body.title,
+            brief: req.body.brief,
+            description: req.body.description,
+            image: req.body.image,
+        });
+
+        const createdPost = await post.save();
+        res.status(201).json(createdPost);
     }
-}
-);
+    );
 
-//@route UPDATE /api/posts/:id
-//@acces Private
-const updatePost = asyncHandler(async (req: Request, res: Response) => {
-    const { title, brief, description, image } = req.body;
+    // //@route DELETE /api/posts/:id
+    // //@acces Private
 
-    const post = await Post.findById(req.params.id);
+    deletePost = asyncHandler(async (req: Request, res: Response) => {
+        const post = await Post.findById(req.params.id);
+        if (post.user.toString() !== req.user.id) {
+            res.status(401);
+            throw new Error('Not authorized');
+        }
 
-    if (post) {
-        post.title = title;
-        post.brief = brief;
-        post.description = description;
-        post.image = image;
-
-        const updatedPost = await post.save();
-        res.status(200).json(updatedPost);
-    } else {
-        res.status(404);
-        throw new Error('Post not found');
+        if (post) {
+            await post.remove();
+            res.status(200).json({ message: 'Post removed' });
+        } else {
+            res.status(404);
+            throw new Error('Post not found');
+        }
     }
+    );
+
+    // //@route UPDATE /api/posts/:id
+    // //@acces Private
+
+    updatePost = asyncHandler(async (req: Request, res: Response) => {
+        const { title, brief, description, image } = req.body;
+
+        const post = await Post.findById(req.params.id);
+
+        if (post) {
+            post.title = title;
+            post.brief = brief;
+            post.description = description;
+            post.image = image;
+
+            const updatedPost = await post.save();
+            res.status(200).json(updatedPost);
+        } else {
+            res.status(404);
+            throw new Error('Post not found');
+        }
+    }
+    );
 }
-); 
-
-module.exports = {
-    getPost,
-    getAllPosts,
-    GetSpecific,
-    SetPost,
-    deletePost,
-    updatePost,
-    
-};
-
-// Path: Backend\Routes\postRoutes.ts
-
-// Path: Backend\Routes\postRoutes.ts
-
-
-
+export default PostController;

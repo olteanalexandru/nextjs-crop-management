@@ -1,4 +1,3 @@
-export {};
 const jwt = require('jsonwebtoken')
 const asyncHandler = require('express-async-handler')
 const User = require('../models/userModel')
@@ -43,4 +42,5 @@ const checkRole = (role) => asyncHandler(async (req, res, next) => {
   }
 });
 
-module.exports = { protect, checkRole };
+
+export { protect, checkRole } 

@@ -1,9 +1,6 @@
-export {};
-var mongoose = require('mongoose')
+import mongoose from "mongoose"
 
-
-
-const postSchema = mongoose.Schema ({
+const postSchema = new mongoose.Schema({
     //linking to user
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -32,7 +29,7 @@ const postSchema = mongoose.Schema ({
     },
 })
 
-module.exports = mongoose.model('Post', postSchema)
+export default mongoose.models.Post || mongoose.model('Post', postSchema)
 
 
 
